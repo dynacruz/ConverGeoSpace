@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor KML/KMZ a SHP y DXF</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --border: #e2e8f0;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: var(--surface);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 700;
+        }
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 1.5rem;
+            background: #fafafa;
+        }
+        .dropzone.active {
+            border-color: var(--primary);
+            background-color: #eff6ff;
+            transform: scale(1.02);
+        }
+        .dropzone svg {
+            width: 48px;
+            height: 48px;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+        .dropzone p {
+            margin: 0;
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--surface);
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        button {
+            width: 100%;
+            padding: 0.875rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        button:disabled {
+            background-color: #94a3b8;
+            cursor: not-allowed;
+        }
+        #file-info {
+            margin-top: -0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            color: #10b981;
+            text-align: center;
+            font-weight: 500;
+        }
+        .error {
+            color: #ef4444;
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Conversor Geoespacial</h1>
+        <form id="convert-form">
+            <div class="dropzone" id="dropzone">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p>Arrastra tu archivo <b>.kml</b> o <b>.kmz</b> aquí</p>
+                <p style="font-size: 0.8rem; margin-top: 0.5rem;">o haz clic para explorar</p>
+                <input type="file" id="file-input" accept=".kml,.kmz" style="display: none;">
+            </div>
+            <div id="file-info"></div>
+            
+            <div class="form-group">
+                <label for="epsg">Sistema de Referencia (EPSG)</label>
+                <select id="epsg" required>
+                    <option value="32717">UTM Zona 17 Sur (EPSG: 32717)</option>
+                    <option value="32718">UTM Zona 18 Sur (EPSG: 32718)</option>
+                    <option value="32617">UTM Zona 17 Norte (EPSG: 32617)</option>
+                    <option value="32618">UTM Zona 18 Norte (EPSG: 32618)</option>
+                </select>
+            </div>
+            
+            <button type="submit" id="submit-btn" disabled>Procesar Archivo</button>
+            <div id="error-msg" class="error"></div>
+        </form>
+    </div>
+
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const fileInfo = document.getElementById('file-info');
+        const submitBtn = document.getElementById('submit-btn');
+        const form = document.getElementById('convert-form');
+        const errorMsg = document.getElementById('error-msg');
+        
+        let currentFile = null;
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('active'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('active'));
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('active');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            errorMsg.textContent = '';
+            const nameLower = file.name.toLowerCase();
+            if (nameLower.endsWith('.kml') || nameLower.endsWith('.kmz')) {
+                currentFile = file;
+                fileInfo.textContent = `Seleccionado: ${file.name}`;
+                submitBtn.disabled = false;
+            } else {
+                currentFile = null;
+                fileInfo.textContent = '';
+                submitBtn.disabled = true;
+                errorMsg.textContent = 'Archivo inválido. Selecciona .kml o .kmz';
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentFile) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Procesando...';
+            errorMsg.textContent = '';
+
+            const formData = new FormData();
+            formData.append('file', currentFile);
+            formData.append('epsg', document.getElementById('epsg').value);
+
+            try {
+                const response = await fetch('/convertir', { method: 'POST', body: formData });
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'topografia_convertida.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    errorMsg.style.color = '#10b981';
+                    errorMsg.textContent = '¡Conversión exitosa!';
+                    setTimeout(() => errorMsg.textContent='', 5000);
+                } else {
+                    const error = await response.json();
+                    errorMsg.style.color = '#ef4444';
+                    errorMsg.textContent = error.detail || 'Error en la conversión';
+                }
+            } catch (error) {
+                errorMsg.style.color = '#ef4444';
+                errorMsg.textContent = 'Error de conexión con el servidor. Verifica que esté en ejecución.';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Procesar Archivo';
+            }
+        });
+    </script>
+</body>
+</html>
