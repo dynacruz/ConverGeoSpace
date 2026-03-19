@@ -4,3 +4,5 @@ python-multipart
 geopandas
 fiona
 pyproj
+simplekml
+ezdxf

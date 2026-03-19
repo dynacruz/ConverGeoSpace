@@ -1,34 +1,66 @@
-# 🌍 Conversor Geoespacial Web: KML/KMZ a SHP y DXF
+# 🌍 Un Conversor Geoespacial Web: KML/KMZ ↔ SHP/DXF
 
-Una aplicación web robusta y orientada a profesionales de Sistemas de Información Geográfica (SIG) y topografía. Permite convertir levantamientos y geometrías en formato KML o KMZ a formatos estándar de la industria (Shapefile y DXF), reproyectándolos con precisión milimétrica a coordenadas UTM (WGS84) y conservando intacta la información alfanumérica.
+Una aplicación web robusta orientada a profesionales de Sistemas de Información Geográfica (SIG) y topografía. Permite la conversión bidireccional entre formatos geoespaciales ampliamente utilizados, garantizando precisión espacial y conservación de atributos.
 
 ## ✨ Características Principales
 
-* **Extracción Automática:** Soporte nativo para archivos `.kml` y carpetas comprimidas `.kmz`.
-* **Reproyección Espacial Precisa:** Transformación automática de coordenadas geográficas (EPSG:4326) a zonas UTM específicas (17S, 18S, 17N, 18N) utilizando `pyproj`.
-* **Integridad de Atributos:** Conservación de la tabla de atributos del KML original. Incluye truncamiento inteligente de nombres de columnas a 10 caracteres para garantizar la compatibilidad estricta con el formato `.dbf` de ESRI.
-* **Formatos de Salida Dual:** Generación simultánea de Shapefiles (`.shp`, `.shx`, `.dbf`, `.prj`) listos para QGIS/ArcGIS, y archivos CAD (`.dxf`) listos para ingeniería.
-* **Sinergia CAD / AutoLISP:** Incluye una rutina LISP (`ImportarTopografia.lsp`) para automatizar la inserción topológicamente correcta del DXF generado directamente en AutoCAD Civil 3D.
+* **Conversión Multiformato:**
+  - KML / KMZ → SHP (Shapefile)
+  - KML / KMZ → DXF (CAD)
+  - SHP → KMZ (Google Earth)
+
+* **Extracción Automática:**  
+  Soporte nativo para archivos `.kml` y `.kmz`, incluyendo descompresión automática.
+
+* **Reproyección Espacial Precisa:**  
+  Transformación de coordenadas geográficas (EPSG:4326) a sistemas UTM (zonas 17S, 18S, 17N, 18N) mediante `pyproj`.
+
+* **Integridad de Atributos:**  
+  Conservación completa de la tabla de atributos.  
+  Incluye truncamiento inteligente de nombres de campos (≤10 caracteres) para compatibilidad con `.dbf`.
+
+* **Salida Profesional Dual:**  
+  - Shapefiles (`.shp`, `.shx`, `.dbf`, `.prj`) compatibles con QGIS/ArcGIS  
+  - Archivos `.dxf` listos para flujos CAD
+
+* **Exportación a Google Earth:**  
+  Conversión de SHP a KMZ optimizada para visualización en entornos web y escritorio.
+
+* **Integración CAD / AutoLISP:**  
+  Incluye rutina `ImportarTopografia.lsp` para inserción automatizada en AutoCAD Civil 3D.
+
+---
 
 ## 🛠️ Casos de Uso
-Ideal para agilizar procesos de levantamiento topográfico, estandarizar datos espaciales para la tasación de predios, y preparar geometrías limpias para flujos de automatización espacial o análisis multicriterio.
+
+Ideal para:
+
+- Procesamiento de levantamientos topográficos  
+- Estandarización de datos espaciales  
+- Preparación de insumos para tasación predial  
+- Integración SIG ↔ CAD  
+- Automatización de flujos geoespaciales  
+
+---
 
 ## 💻 Tecnologías Utilizadas
 
-* **Backend:** Python 3.12, FastAPI, Uvicorn
-* **Motor Geoespacial:** GeoPandas, Fiona, PyProj, Shapely (basados en GDAL/OGR)
-* **Frontend:** HTML5, Vanilla JavaScript, Tailwind CSS
-* **Integración CAD:** AutoLISP
+* **Backend:** Python 3.12, FastAPI, Uvicorn  
+* **Motor Geoespacial:** GeoPandas, Fiona, PyProj, Shapely (basados en GDAL/OGR)  
+* **Frontend:** HTML5, JavaScript, Tailwind CSS  
+* **Integración CAD:** AutoLISP  
+
+---
 
 ## 🚀 Instalación y Despliegue Local
 
-Debido a que el motor geoespacial subyacente requiere binarios C++ (GDAL), **se recomienda estrictamente el uso de Conda** (Miniconda/Anaconda) en entornos Windows para evitar errores de compilación.
+Debido a que el motor geoespacial depende de binarios nativos (GDAL), se recomienda el uso de Conda (Miniconda/Anaconda) en entornos Windows.
 
 ### 1. Clonar el repositorio y preparar el entorno
-```bash
-git clone [https://github.com/TU_USUARIO/conversor_geoespacial.git](https://github.com/TU_USUARIO/conversor_geoespacial.git)
-cd conversor_geoespacial
 
-# Crear y activar un entorno virtual con Python 3.12
+```bash
+git clone https://github.com/TU_USUARIO/ConverGeoSpace.git
+cd ConverGeoSpace
+
 conda create -n geo_env python=3.12 -y
 conda activate geo_env
