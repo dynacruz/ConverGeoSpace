@@ -1,66 +1,81 @@
-# 🌍 Un Conversor Geoespacial Web: KML/KMZ ↔ SHP/DXF
+# 🌍 ConverGeoSpace: Conversor Geoespacial Web KML/KMZ ↔ SHP/DXF
 
-Una aplicación web robusta orientada a profesionales de Sistemas de Información Geográfica (SIG) y topografía. Permite la conversión bidireccional entre formatos geoespaciales ampliamente utilizados, garantizando precisión espacial y conservación de atributos.
+Una aplicación web robusta orientada a profesionales de Sistemas de Información Geográfica (SIG) y topografía. Permite la conversión bidireccional entre formatos geoespaciales ampliamente utilizados, garantizando precisión espacial, conservación de atributos y enriquecimiento automático de la geometría.
 
-## ✨ Características Principales
+---
 
-* **Conversión Multiformato:**
+## 🚀 ¿Cómo iniciar la aplicación? (Acceso Rápido)
+
+¡Acceder a la aplicación es muy sencillo y directo!
+En la carpeta principal del proyecto encontrarás un archivo diseñado específicamente para arrancar todo el sistema con un solo clic.
+
+Solo haz doble clic en el archivo:
+🚀 **`1-INICIAR_APLICACION.bat`**
+
+> Una vez ejecutado, espera unos segundos. La aplicación iniciará el servidor local y te indicará la ruta web (por defecto `http://127.0.0.1:8000`) a la que puedes acceder desde tu navegador favorito para empezar a convertir tus archivos.
+
+---
+
+## ✨ Características y Nuevas Funciones
+
+* **Conversión Multiformato Optimizada:**
   - KML / KMZ → SHP (Shapefile)
-  - KML / KMZ → DXF (CAD)
-  - SHP → KMZ (Google Earth)
+  - KML / KMZ → DXF (AutoCAD / CAD) mediante la avanzada librería `ezdxf`
+  - Paquetes SHP/ZIP → KMZ (Google Earth)
 
-* **Extracción Automática:**  
-  Soporte nativo para archivos `.kml` y `.kmz`, incluyendo descompresión automática.
+* **📏 Cálculo Geométrico Automático (¡NUEVO!):**  
+  Durante la traducción, la aplicación calcula e inyecta propiedades valiosas en tus atributos:
+  - **Polígonos:** Área total (m²), Perímetro (m), y Coordenadas del Centroide (X, Y).
+  - **Líneas (Rutas):** Longitud o Perímetro (m).
+  - **Puntos:** Ubicación en Coordenadas (X, Y).
 
-* **Reproyección Espacial Precisa:**  
-  Transformación de coordenadas geográficas (EPSG:4326) a sistemas UTM (zonas 17S, 18S, 17N, 18N) mediante `pyproj`.
+* **Reproyección Espacial Automatizada:**  
+  Transformación de coordenadas geográficas (WGS84 / EPSG:4326) a los sistemas métricos UTM (zonas 17S, 18S, 17N, 18N) a través de `pyproj`.
 
-* **Integridad de Atributos:**  
-  Conservación completa de la tabla de atributos.  
-  Incluye truncamiento inteligente de nombres de campos (≤10 caracteres) para compatibilidad con `.dbf`.
-
-* **Salida Profesional Dual:**  
-  - Shapefiles (`.shp`, `.shx`, `.dbf`, `.prj`) compatibles con QGIS/ArcGIS  
-  - Archivos `.dxf` listos para flujos CAD
-
-* **Exportación a Google Earth:**  
-  Conversión de SHP a KMZ optimizada para visualización en entornos web y escritorio.
+* **Integridad y Conservación de Atributos:**  
+  Extrae de forma limpia todos los campos descriptivos de las tablas de datos (ExtendedData) de los KML/KMZ.
+  Truncamiento automático e inteligente de nombres de campo (≤10 caracteres) para total compatibilidad con estándares DBF/Shapefile.
 
 * **Integración CAD / AutoLISP:**  
-  Incluye rutina `ImportarTopografia.lsp` para inserción automatizada en AutoCAD Civil 3D.
+  Ahora ubicado de forma organizada en la carpeta `cad_tools`, incluye la rutina `ImportarTopografia.lsp` para una inserción fluida de tus resultados en AutoCAD Civil 3D.
 
 ---
 
-## 🛠️ Casos de Uso
+## 🛠️ Casos de Uso Frecuentes
 
-Ideal para:
+Ideal para profesionales, ingenieros y especialistas que requieran:
 
-- Procesamiento de levantamientos topográficos  
-- Estandarización de datos espaciales  
-- Preparación de insumos para tasación predial  
-- Integración SIG ↔ CAD  
-- Automatización de flujos geoespaciales  
-
----
-
-## 💻 Tecnologías Utilizadas
-
-* **Backend:** Python 3.12, FastAPI, Uvicorn  
-* **Motor Geoespacial:** GeoPandas, Fiona, PyProj, Shapely (basados en GDAL/OGR)  
-* **Frontend:** HTML5, JavaScript, Tailwind CSS  
-* **Integración CAD:** AutoLISP  
+- Simplificar y acelerar procesamientos de levantamientos topográficos.
+- Estandarización rápida de datos espaciales.
+- Calcular automáticamente áreas, perímetros y coordenadas sin abrir QGIS/ArcGIS.
+- Transformar datos rápidos de Google Earth hacia plataformas de ingeniería asistida por computadora (CAD).
+- Generación rápida de insumos para tasación predial y catastro.
 
 ---
 
-## 🚀 Instalación y Despliegue Local
+## 📂 Estructura del Proyecto
 
-Debido a que el motor geoespacial depende de binarios nativos (GDAL), se recomienda el uso de Conda (Miniconda/Anaconda) en entornos Windows.
+El proyecto está diseñado para ser limpio y fácil de entender por cualquier usuario u otro desarrollador:
 
-### 1. Clonar el repositorio y preparar el entorno
+- `/` (Raíz): Contiene `1-INICIAR_APLICACION.bat`, configuraciones principales y los scripts base (`main.py`, `requirements.txt`).
+- `static/`: Contiene la maravillosa y fluida interfaz visual (Frontend) en HTML y Tailwind CSS.
+- `cad_tools/`: Rutinas y complementos complementarios para usuarios de CAD (LISP o rutinas externas).
+- `tests/`: Scripts utilizados para pruebas estructurales y compilación.
+- `build_tools/`: Contiene los scripts y el archivo de especificaciones `.spec` necesarios si quieres compilar la app en un ejecutable cerrado (`.exe`) sin necesidad de Anaconda o Python instalado.
 
-```bash
-git clone https://github.com/TU_USUARIO/ConverGeoSpace.git
-cd ConverGeoSpace
+---
 
-conda create -n geo_env python=3.12 -y
-conda activate geo_env
+## 💻 Entorno y Tecnologías Base
+
+* **Backend Servidor:** Python 3.12, FastAPI, Uvicorn
+* **Motor Geoespacial Subyacente:** GeoPandas, Fiona, PyProj, Shapely, Ezdxf
+* **Frontend y UI:** HTML5 + JavaScript Vainilla, Tailwind CSS (Modo Oscuro Glassmorphism)
+
+> **Nota para Desarrolladores:**
+> Debido a dependencias estrictas de binarios como GDAL (vía Fiona y Geopandas), se recomienda fervientemente utilizar entornos de `Conda` (Miniconda o Anaconda) si deseas modificar o correr el código fuente en Windows en lugar de pip nativo. 
+> 
+> ```bash
+> conda create -n geo_env python=3.12
+> conda activate geo_env
+> pip install -r requirements.txt
+> ```

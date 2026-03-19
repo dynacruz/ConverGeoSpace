@@ -1,3 +1,4 @@
+import sys
 import os
 import shutil
 import tempfile
@@ -9,6 +10,19 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTa
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from starlette.staticfiles import StaticFiles
+
+if getattr(sys, 'frozen', False):
+    # Redirect stdout/stderr when frozen and --noconsole is used
+    sys.stdout = open(os.devnull, 'w')
+    sys.stderr = open(os.devnull, 'w')
+
+def get_base_path():
+    if hasattr(sys, '_MEIPASS'):
+        return sys._MEIPASS
+    return os.path.dirname(os.path.abspath(__file__))
+
+BASE_DIR = get_base_path()
+STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 # Note: geospacial libs might fail on some Python 3.14 environments without wheels
 try:
@@ -31,12 +45,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-os.makedirs("static", exist_ok=True)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+os.makedirs(STATIC_DIR, exist_ok=True)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/")
 async def root():
-    with open("static/index.html", "r", encoding="utf-8") as f:
+    with open(os.path.join(STATIC_DIR, "index.html"), "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
 
 def cleanup_files(*paths):
@@ -359,3 +373,17 @@ async def convertir_a_kml(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    import uvicorn
+    import webbrowser
+    from threading import Timer
+
+    def open_browser():
+        webbrowser.open_new("http://127.0.0.1:8000")
+
+    print("Iniciando el servidor de ConverGeoSpace...")
+    # Abre el navegador después de 1.5 segundos
+    Timer(1.5, open_browser).start()
+    # Ejecuta la aplicación
+    uvicorn.run(app, host="127.0.0.1", port=8000)
